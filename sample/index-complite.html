@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <title>sample</title>
+
+    <style>
+        * {
+            margin: 0;
+        }
+        html {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+        body > div {
+            font-size: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+<div
+    id="opponentMessage"
+>
+    相手の選択は ？
+</div>
+<div
+    id="selfMessage"
+>
+    勝敗の結果は ？
+</div>
+<form
+    id="gameForm"
+>
+    <span>あなたの選択は</span>
+    <select name="mySelect">
+        <option>グー</option>
+        <option>チョキ</option>
+        <option>パー</option>
+    </select>
+    <div>
+        <span>永久保存</span>
+        <input type="checkbox" name="isPermanent">
+    </div>
+    <input type="submit" value="決定">
+</form>
+<button
+    id="deleteScore"
+>
+    記録を削除
+</button>
+<table
+  id="score"
+>
+
+</table>
+
+<script>
+    window.addEventListener(
+        "load",
+        _ => main(),
+        false
+    )
+
+    let main = () => {
+        let gameForm = document.getElementById("gameForm");
+        gameForm.addEventListener("submit", e => myGame(e), false);
+
+        class Score {
+            constructor() {
+                this.subscribers = []
+            }
+
+            addScore({
+                // sample recode
+                // [{
+                //     hisHand: "ぐー",
+                //     myHand : "パー",
+                //     result : "あなたの 負け"
+                // }]
+                recode,
+                isPermanent=true
+            }) {
+                let storage = isPermanent ? localStorage : sessionStorage
+                storage.setItem(
+                    "score",
+                    JSON.stringify(
+                        this._readScoreByStorages({
+                            storages: [storage]
+                        })
+                        .concat(recode)
+                    )
+                )
+                this._callSubscribers(this.readAllScore())
+
+                return recode
+            }
+
+            readAllScore() {
+                return this._readScoreByStorages(
+                    {
+                        storages: [sessionStorage, localStorage]
+                    }
+                )
+            }
+
+            deleteAllScore() {
+                [sessionStorage, localStorage].map(x => {
+                    x.removeItem("score")
+                })
+                this._callSubscribers(this.readAllScore())
+            }
+
+            subscribe(callback) {
+                let id = Math.random()
+                this.subscribers = this.subscribers.concat({
+                    id,
+                    callback
+                })
+
+                return id
+            }
+
+            unsubscribe(id) {
+                this.subscribers.filter(x => x.id != id)
+                return true
+            }
+
+            _callSubscribers(result) {
+                this.subscribers.map(x =>
+                    x.callback(result || [])
+                )
+            }
+
+            _readScoreByStorages({
+                storages=[]
+            }) {
+                let result = storages
+                    .map(x =>
+                        JSON.parse(x.getItem("score")) || []
+                    )
+                    .reduce((a, b) =>
+                        a.concat(b),
+                        []
+                    )
+                return result
+            }
+        }
+
+        let score = new Score()
+        document.getElementById("deleteScore")
+          .addEventListener(
+              "click",
+              _ => score.deleteAllScore(),
+              false
+          )
+
+        score.subscribe(
+            score => {
+                let scoreElement = document.getElementById("score")
+                while (scoreElement.firstChild)
+                    scoreElement.removeChild(scoreElement.firstChild);
+                score.map(x => {
+                    let tr = document.createElement("tr")
+                    Object.entries(x)
+                        .map(x => {
+                            let td = document.createElement("td")
+                            td.innerHTML = x[1]
+                            tr.appendChild(td)
+                    })
+                    scoreElement.appendChild(tr)
+                })
+            }
+        )
+
+        let myGame = e => {
+            e.preventDefault()
+            let form = e.target
+            let myNumber = form.elements["mySelect"].selectedIndex
+            let hisNumber = Math.floor(Math.random()*3);
+
+            let x = myNumber - hisNumber;
+            let judge = x == -2 || x == 1 ? "あなたの 負け"
+                      : x == 0            ? "両者の 引き分け"
+                      :                     "あなたの 勝ち"
+
+            // tuple
+            let hands = (
+                [myNumber, hisNumber].map(x =>
+                    x == 0 ? "グー"
+                  : x == 1 ? "チョキ"
+                  :          "パー"
+                )
+            )
+
+            document.getElementById("opponentMessage").innerHTML = "相手の選択は " + hands[1];
+            document.getElementById("selfMessage").innerHTML     = "勝敗の結果は " + judge;
+
+            score.addScore({
+                recode: {
+                    hisHand: hands[1],
+                    myHand : hands[0],
+                    judge
+                },
+                isPermanent: form.elements["isPermanent"].checked
+            })
+
+        }
+    }
+
+</script>
+</body>
+</html>

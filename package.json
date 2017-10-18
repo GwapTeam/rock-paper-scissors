@@ -1,0 +1,24 @@
+{
+  "name": "rock-paper-scissors",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "npm run postinstall:production",
+    "postinstall:development": "webpack -d",
+    "postinstall:production": "webpack -p",
+    "start": "browser-sync start --config bs-config.js"
+  },
+  "license": "GNUGPLv3",
+  "devDependencies": {
+    "babel-core": "^6.22.1",
+    "babel-loader": "^7.1.2",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-plugin-transform-object-rest-spread": "^6.22.0",
+    "browser-sync": "^2.18.13",
+    "webpack": "^3.7.1"
+  },
+  "dependencies": {
+    "babel-minify-webpack-plugin": "^0.2.0",
+    "cors": "^2.8.4"
+  }
+}

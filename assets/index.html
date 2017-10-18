@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <title>sample</title>
+
+    <style>
+        * {
+            margin: 0;
+        }
+        html {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+        body > div {
+            font-size: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+<div
+    id="opponentMessage"
+>
+    相手の選択は ？
+</div>
+<div
+    id="selfMessage"
+>
+    勝敗の結果は ？
+</div>
+<form
+    id="gameForm"
+>
+    <span>あなたの選択は</span>
+    <select name="mySelect">
+        <option>グー</option>
+        <option>チョキ</option>
+        <option>パー</option>
+    </select>
+    <div>
+        <span>永久保存</span>
+        <input type="checkbox" name="isPermanent">
+    </div>
+    <input type="submit" value="決定">
+</form>
+<button
+    id="deleteScore"
+>
+    記録を削除
+</button>
+<table
+  id="score"
+>
+
+</table>
+
+<script src="main.js"></script>
+</body>
+</html>
